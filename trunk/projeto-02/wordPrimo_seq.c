@@ -7,15 +7,19 @@
 #include <math.h>
 #include <ctype.h>
 
+#define BLOCK_SIZE 100
+#define WORD_SIZE 50
+
 char *strRev(char *);
 int chkPal(char *);
 int chkPrimo(char *);
 void strUpper(char *);
+void parser(char *, char **, int *);
 
 int main(int argc, char *argv[])
 {
-	int cont = 0, cont2 = 0;
-	char *message, pch[100];
+	int cont = 0, cont2 = 0, i, n = 0;
+	char *message, pch[BLOCK_SIZE], *words[WORD_SIZE];
 	FILE *fpin;
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
@@ -26,21 +30,31 @@ int main(int argc, char *argv[])
 
 	while(!feof(fpin))
 	{	
-		fgets(pch, 100, fpin);
-	  	message = strtok (pch, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
-	  	while (message != NULL)
-	  	{	
-			if(chkPal(message)){
+		fgets(pch, BLOCK_SIZE, fpin);
+		parser(pch,words,&n);
+	  	for(i=0;i<n;i++){		 			
+			if(chkPal(words[i])){			
 				cont++;
-				if(chkPrimo(message))
+				if(chkPrimo(words[i]))
 					cont2++;
 			}
-	    		message = strtok(NULL, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
-	  	}
+		}
 	}
 	printf("# pal: %d\n# primo: %d\n", cont, cont2);
 
 	return 0;
+}
+
+void parser(char *bloco, char **words, int *n)
+{
+	int m = 0;	
+	char *message = strtok(bloco, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
+	while(message != NULL){
+		words[m] = message;
+		message = strtok(NULL, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
+		m++;
+	}
+	*n = m;
 }
 
 char *strRev(char *str)

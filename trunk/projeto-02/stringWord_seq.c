@@ -7,14 +7,20 @@
 #include <math.h>
 #include <ctype.h>
 
+#define BLOCK_SIZE 300
+#define WORD_SIZE 50
+#define PHRASE_SIZE 100
+
 char *strRev(char *);
 int chkPal(char *);
 void strUpper(char *);
+void parserPh(char *, char **, int *);
+void parserW(char *, char **, int *);
 
 int main(int argc, char *argv[])
 {
-	int contW = 0, contS = 0;
-	char *str, pch[300], *endStr;
+	int contW = 0, contS = 0, n = 0, m = 0, i, j;
+	char *str, pch[BLOCK_SIZE], *phrases[PHRASE_SIZE], *words[WORD_SIZE];
 	FILE *fpin;
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
@@ -25,27 +31,44 @@ int main(int argc, char *argv[])
 
 	while(!feof(fpin))
 	{	
-		fgets(pch, 300, fpin);
-		str = strtok_r(pch, ".\t\n", &endStr);
-		while(str != NULL)
-		{
-			char *endToken;
-			printf("%s\n",str);
-			if(chkPal(str))
+		fgets(pch, BLOCK_SIZE, fpin);
+		parserPh(pch,phrases,&n);
+		for(i=0;i<n;i++){
+			if(chkPal(phrases[i]))
 				contS++;
-		  	char *message = strtok_r(str, " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\", &endToken);
-		  	while (message != NULL)
-		  	{
-				printf("%s\n", message);
-				if(chkPal(message))
+			parserW(phrases[i],words,&m);
+			for(j=0;j<m;j++){
+				if(chkPal(words[j]))
 					contW++;
-		    		message = strtok_r(NULL, " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\", &endToken);
-	  		}	
-			str = strtok_r(NULL, ".\t\n", &endStr);
-		}
+			}
+		}		
 	}
 	printf("# palW: %d\n# palS: %d\n", contW, contS);
 	return 0;
+}
+
+void parserPh(char *bloco, char **phrases, int *n)
+{
+	int m = 0;	
+	char *message = strtok(bloco, ".\t\n");
+	while(message != NULL){
+		phrases[m] = message;
+		message = strtok(NULL, " .\t\n");
+		m++;
+	}
+	*n = m;
+}
+
+void parserW(char *bloco, char **words, int *n)
+{
+	int m = 0;	
+	char *message = strtok(bloco, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
+	while(message != NULL){
+		words[m] = message;
+		message = strtok(NULL, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
+		m++;
+	}
+	*n = m;
 }
 
 char *strRev(char *str)
