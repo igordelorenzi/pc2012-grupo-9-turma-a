@@ -1,13 +1,12 @@
 /*
- * Para compilar: gcc wordPrimo_seq.c -o wp_seq -lm
+ * Para compilar: gcc wordPrimo_seq.c -o wp_seq -lm -fopenmp
  */
 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
-#include <sys/time.h>
-#include <time.h>
+#include <omp.h>
 
 #define BLOCK_SIZE 100
 #define WORD_SIZE 50
@@ -21,9 +20,9 @@ void parser(char *, char **, int *);
 int main(int argc, char *argv[])
 {
 	int cont = 0, cont2 = 0, i, n = 0;
+	double star, end, nT = 0.0, wT = 0.0;
 	char *message, pch[BLOCK_SIZE], *words[WORD_SIZE];
 	FILE *fpin;
-	struct timespec inicio, fim;		
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
 	{	
@@ -36,15 +35,21 @@ int main(int argc, char *argv[])
 		fgets(pch, BLOCK_SIZE, fpin);
 		parser(pch,words,&n);
 	  	for(i=0;i<n;i++){		 			
-			if(chkPal(words[i])){			
+			star = omp_get_wtime(); 		 			
+			if(chkPal(words[i])){
+				end = omp_get_wtime();
+				wT += end - star;			
 				cont++;
-				if(chkPrimo(words[i]))
+				star = omp_get_wtime();
+				if(chkPrimo(words[i])){
+					end = omp_get_wtime();
+					nT += end - star;
 					cont2++;
+				}
 			}
 		}
 	}
-	printf("# pal: %d\n# primo: %d\n", cont, cont2);
-
+	printf("# Tempo para palavra: %fs\n# Tempo para primo: %fs\n# pal: %d\n# primo: %d\n", wT, nT, cont, cont2);
 	return 0;
 }
 
@@ -103,7 +108,8 @@ int chkPrimo(char palavra[])
 	int i, divisor, divisores, num=0;
 	float max;
 
-	for (i=0;i<strlen(palavra);i++) num += (int)palavra[i];
+	for (i=0;i<strlen(palavra);i++) 
+		num += (int)palavra[i];
 
 	if(num == 1 || num == 2 || num == 3)
 		return 1;

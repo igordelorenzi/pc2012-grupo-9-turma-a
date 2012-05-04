@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 {
 	int contW = 0, contS = 0, n = 0, m = 0, i, j;
 	char *str, pch[BLOCK_SIZE], *phrases[PHRASE_SIZE], *message, *endToken;
+	double star, end, pT = 0.0, wT = 0.0;	
 	FILE *fpin;
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
@@ -33,20 +34,28 @@ int main(int argc, char *argv[])
 	{
 		fread(pch, 1, BLOCK_SIZE, fpin);
 		parser(pch,phrases,&n);
-	       #pragma omp parallel for num_threads(2) private(message,endToken) shared(phrases) reduction(+:contS,contW)
+	       #pragma omp parallel for num_threads(2) private(message,endToken) shared(phrases) reduction(+:contS,contW,wT,pT)
 		for(i=0;i<n;i++){
-			if(chkPal(phrases[i]))
+			star = omp_get_wtime();
+			if(chkPal(phrases[i])){
+				end = omp_get_wtime();
+				pT += end - star;
 				contS++;
+			}
 			message = strtok_r(phrases[i], " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\", &endToken);
 			while(message != NULL){
-				if(chkPal(message))
+				star = omp_get_wtime();				
+				if(chkPal(message)){
+					end = omp_get_wtime();
+					wT += end - star;
 					contW++;
+				}
 				message = strtok_r(NULL, " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\", &endToken);
 			}
 		}
 		*phrases = NULL;		
 	}
-	printf("# palW: %d\n# palS: %d\n", contW, contS);
+	printf("# Tempo para palavra: %fs\n# Tempo para frase: %fs\n# palW: %d\n# palS: %d\n", wT, pT, contW, contS);
 	return 0;
 }
 

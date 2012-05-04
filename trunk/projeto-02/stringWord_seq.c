@@ -1,5 +1,5 @@
 /*
- * Para compilar: gcc stringWord_seq.c -o sw_seq -lm
+ * Para compilar: gcc stringWord_seq.c -o sw_seq -lm -fopenmp
  */
 
 #include <stdlib.h>
@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
+#include <omp.h>
 
 #define BLOCK_SIZE 300
 #define WORD_SIZE 50
@@ -20,6 +21,7 @@ void parser(char *, char **, int *);
 int main(int argc, char *argv[])
 {
 	int contW = 0, contS = 0, n = 0, m = 0, i, j;
+	double star, end, pT = 0.0, wT = 0.0;
 	char *str, pch[BLOCK_SIZE], *phrases[PHRASE_SIZE], *message;
 	FILE *fpin;
 
@@ -34,18 +36,26 @@ int main(int argc, char *argv[])
 		fread(pch, 1, BLOCK_SIZE, fpin);
 		parser(pch,phrases,&n);
 		for(i=0;i<n;i++){
-			if(chkPal(phrases[i]))
+			star = omp_get_wtime();
+			if(chkPal(phrases[i])){
+				end = omp_get_wtime();
+				pT += end - star;				
 				contS++;
+			}
 			message = strtok(phrases[i], " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\");
 			while(message != NULL){
-				if(chkPal(message))
+				star = omp_get_wtime();
+				if(chkPal(message)){
+					end = omp_get_wtime();
+					wT += end - star;
 					contW++;
+				}
 				message = strtok(NULL, " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\");
 			}
 		}
 		*phrases = NULL;	
 	}
-	printf("# palW: %d\n# palS: %d\n", contW, contS);
+	printf("# Tempo para palavra: %fs\n# Tempo para frase: %fs\n# palW: %d\n# palS: %d\n", wT, pT, contW, contS);
 	return 0;
 }
 

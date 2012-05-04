@@ -7,8 +7,6 @@
 #include <math.h>
 #include <ctype.h>
 #include <omp.h>
-#include <sys/time.h>
-#include <time.h>
 
 #define BLOCK_SIZE 100
 #define WORD_SIZE 50
@@ -22,9 +20,9 @@ void parser(char *, char **, int *);
 int main(int argc, char *argv[])
 {
 	int cont = 0, cont2 = 0, i, n = 0;
+	double star, end, nT = 0.0, wT = 0.0;
 	char *message, pch[BLOCK_SIZE], *words[WORD_SIZE];
-	FILE *fpin;
-	struct timespec inicio, fim;	
+	FILE *fpin;	
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
 	{	
@@ -36,16 +34,23 @@ int main(int argc, char *argv[])
 	{	
 		fgets(pch, BLOCK_SIZE, fpin);
 		parser(pch,words,&n);
-		#pragma omp parallel for num_threads(2) reduction(+:cont) reduction(+:cont2)		  	
-		for(i=0;i<n;i++){		 			
-			if(chkPal(words[i])){			
+		#pragma omp parallel for num_threads(2) reduction(+:cont,cont2,wT,nT)		  	
+		for(i=0;i<n;i++){
+			star = omp_get_wtime(); 		 			
+			if(chkPal(words[i])){
+				end = omp_get_wtime();
+				wT += end - star;			
 				cont++;
-				if(chkPrimo(words[i]))
+				star = omp_get_wtime();
+				if(chkPrimo(words[i])){
+					end = omp_get_wtime();
+					nT += end - star;
 					cont2++;
+				}
 			}
 		}  	
 	}
-	printf("# pal: %d\n# primo: %d\n", cont, cont2);
+	printf("# Tempo para palavra: %fs\n# Tempo para primo: %fs\n# pal: %d\n# primo: %d\n", wT, nT, cont, cont2);
 	return 0;
 }
 
