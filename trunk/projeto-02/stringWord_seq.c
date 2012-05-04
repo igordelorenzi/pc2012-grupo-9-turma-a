@@ -22,7 +22,6 @@ int main(int argc, char *argv[])
 	int contW = 0, contS = 0, n = 0, m = 0, i, j;
 	char *str, pch[BLOCK_SIZE], *phrases[PHRASE_SIZE], *message;
 	FILE *fpin;
-	struct timespec inicio, fim;
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
 	{	
@@ -41,7 +40,6 @@ int main(int argc, char *argv[])
 			while(message != NULL){
 				if(chkPal(message))
 					contW++;
-				//printf("%s\n", message);
 				message = strtok(NULL, " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\");
 			}
 		}
