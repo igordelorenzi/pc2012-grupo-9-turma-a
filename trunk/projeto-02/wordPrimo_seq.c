@@ -1,11 +1,13 @@
 /*
- * Para compilar: gcc teste.c -o teste -lm
+ * Para compilar: gcc wordPrimo_seq.c -o wp_seq -lm
  */
 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
+#include <sys/time.h>
+#include <time.h>
 
 #define BLOCK_SIZE 100
 #define WORD_SIZE 50
@@ -21,13 +23,14 @@ int main(int argc, char *argv[])
 	int cont = 0, cont2 = 0, i, n = 0;
 	char *message, pch[BLOCK_SIZE], *words[WORD_SIZE];
 	FILE *fpin;
+	struct timespec inicio, fim;		
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
 	{	
 		printf("Problema no arquivo.\n");
 		return -1;
 	}
-
+	
 	while(!feof(fpin))
 	{	
 		fgets(pch, BLOCK_SIZE, fpin);

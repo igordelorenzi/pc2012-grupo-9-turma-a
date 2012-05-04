@@ -1,5 +1,5 @@
 /*
- * Para compilar: gcc teste.c -o teste -lm -fopenmp
+ * Para compilar: gcc wordPrimo_OMP.c -o wp_omp -lm -fopenmp
  */
 
 #include <stdio.h>
@@ -7,6 +7,8 @@
 #include <math.h>
 #include <ctype.h>
 #include <omp.h>
+#include <sys/time.h>
+#include <time.h>
 
 #define BLOCK_SIZE 100
 #define WORD_SIZE 50
@@ -22,18 +24,19 @@ int main(int argc, char *argv[])
 	int cont = 0, cont2 = 0, i, n = 0;
 	char *message, pch[BLOCK_SIZE], *words[WORD_SIZE];
 	FILE *fpin;
+	struct timespec inicio, fim;	
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
 	{	
 		printf("Problema no arquivo.\n");
 		return -1;
 	}
-
+	
 	while(!feof(fpin))
 	{	
 		fgets(pch, BLOCK_SIZE, fpin);
 		parser(pch,words,&n);
-		#pragma omp parallel for num_threads(2) schedule(dynamic,30) reduction(+:cont) reduction(+:cont2)		  	
+		#pragma omp parallel for num_threads(2) reduction(+:cont) reduction(+:cont2)		  	
 		for(i=0;i<n;i++){		 			
 			if(chkPal(words[i])){			
 				cont++;
@@ -43,7 +46,6 @@ int main(int argc, char *argv[])
 		}  	
 	}
 	printf("# pal: %d\n# primo: %d\n", cont, cont2);
-
 	return 0;
 }
 
@@ -93,7 +95,7 @@ int chkPal(char *str)
 void strUpper(char *str)
 {
 	int i;
-	#pragma omp parallel for
+
 	for (i=0;i<strlen(str);i++)
 		str[i] = toupper(str[i]);
 }
@@ -103,7 +105,6 @@ int chkPrimo(char palavra[])
 	int i, divisor, divisores, num=0;
 	float max;
 	
-	#pragma omp parallel for reduction(+:num)
 	for (i=0;i<strlen(palavra);i++) 
 		num += (int)palavra[i];
 

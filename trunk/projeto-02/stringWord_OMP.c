@@ -1,5 +1,5 @@
 /*
- * Para compilar: gcc str.c -o str -lm -fopenmp
+ * Para compilar: gcc stringWord_OMP.c -o sw_omp -lm -fopenmp
  */
 
 #include <stdio.h>
@@ -15,13 +15,12 @@
 char *strRev(char *);
 int chkPal(char *);
 void strUpper(char *);
-void parserPh(char *, char **, int *);
-void parserW(char *, char **, int *);
+void parser(char *, char **, int *);
 
 int main(int argc, char *argv[])
 {
 	int contW = 0, contS = 0, n = 0, m = 0, i, j;
-	char *str, pch[BLOCK_SIZE], *phrases[PHRASE_SIZE], *words[WORD_SIZE];
+	char *str, pch[BLOCK_SIZE], *phrases[PHRASE_SIZE], *message;
 	FILE *fpin;
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
@@ -29,46 +28,36 @@ int main(int argc, char *argv[])
 		printf("Problema no arquivo.\n");
 		return -1;
 	}
-
+	
 	while(!feof(fpin))
-	{	
-		fgets(pch, BLOCK_SIZE, fpin);
-		parserPh(pch,phrases,&n);
-		#pragma omp parallel for num_threads(2) schedule(dynamic,30) reduction(+:contS) reduction(+:contW)
+	{
+		fread(pch, 1, BLOCK_SIZE, fpin);
+		parser(pch,phrases,&n);
+		#pragma omp parallel for num_threads(2) private(message) reduction(+:contS) reduction(+:contW)
 		for(i=0;i<n;i++){
 			if(chkPal(phrases[i]))
 				contS++;
-			parserW(phrases[i],words,&m);
-			#pragma omp parallel for num_threads(2) shared(i,n) schedule(dynamic,30) reduction(+:contW)
-			for(j=0;j<m;j++){
-				if(chkPal(words[j]))
+			message = strtok(phrases[i], " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\");
+			while(message != NULL){
+				if(chkPal(message))
 					contW++;
+				//printf("%s\n", message);
+				message = strtok(NULL, " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\");
 			}
-		}		
+		}
+		*phrases = NULL;		
 	}
 	printf("# palW: %d\n# palS: %d\n", contW, contS);
 	return 0;
 }
 
-void parserPh(char *bloco, char **phrases, int *n)
+void parser(char *bloco, char **phrases, int *n)
 {
 	int m = 0;	
-	char *message = strtok(bloco, ".\t\n");
+	char *message = strtok(bloco, ".\t\n\r");
 	while(message != NULL){
 		phrases[m] = message;
-		message = strtok(NULL, " .\t\n");
-		m++;
-	}
-	*n = m;
-}
-
-void parserW(char *bloco, char **words, int *n)
-{
-	int m = 0;	
-	char *message = strtok(bloco, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
-	while(message != NULL){
-		words[m] = message;
-		message = strtok(NULL, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
+		message = strtok(NULL, ".\t\n\r");
 		m++;
 	}
 	*n = m;
@@ -91,8 +80,8 @@ char *strRev(char *str)
 
 int chkPal(char *str)
 {
-	char aux[100];
-	
+	char aux[1000];
+		
 	if(strlen(str) > 1){
 		strUpper(str);
 		strcpy(aux,str);

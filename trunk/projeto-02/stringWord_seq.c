@@ -1,7 +1,8 @@
 /*
- * Para compilar: gcc str.c -o str -lm
+ * Para compilar: gcc stringWord_seq.c -o sw_seq -lm
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -14,58 +15,49 @@
 char *strRev(char *);
 int chkPal(char *);
 void strUpper(char *);
-void parserPh(char *, char **, int *);
-void parserW(char *, char **, int *);
+void parser(char *, char **, int *);
 
 int main(int argc, char *argv[])
 {
 	int contW = 0, contS = 0, n = 0, m = 0, i, j;
-	char *str, pch[BLOCK_SIZE], *phrases[PHRASE_SIZE], *words[WORD_SIZE];
+	char *str, pch[BLOCK_SIZE], *phrases[PHRASE_SIZE], *message;
 	FILE *fpin;
+	struct timespec inicio, fim;
 
 	if((fpin=fopen(argv[1], "r")) == NULL)
 	{	
 		printf("Problema no arquivo.\n");
 		return -1;
 	}
-
+	
 	while(!feof(fpin))
 	{	
-		fgets(pch, BLOCK_SIZE, fpin);
-		parserPh(pch,phrases,&n);
+		fread(pch, 1, BLOCK_SIZE, fpin);
+		parser(pch,phrases,&n);
 		for(i=0;i<n;i++){
 			if(chkPal(phrases[i]))
 				contS++;
-			parserW(phrases[i],words,&m);
-			for(j=0;j<m;j++){
-				if(chkPal(words[j]))
+			message = strtok(phrases[i], " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\");
+			while(message != NULL){
+				if(chkPal(message))
 					contW++;
+				//printf("%s\n", message);
+				message = strtok(NULL, " ,/?'\";:|^-!$#@`~*&%)(+=_}{][\\");
 			}
-		}		
+		}
+		*phrases = NULL;	
 	}
 	printf("# palW: %d\n# palS: %d\n", contW, contS);
 	return 0;
 }
 
-void parserPh(char *bloco, char **phrases, int *n)
+void parser(char *bloco, char **phrases, int *n)
 {
 	int m = 0;	
-	char *message = strtok(bloco, ".\t\n");
+	char *message = strtok(bloco, ".\t\n\r");
 	while(message != NULL){
 		phrases[m] = message;
-		message = strtok(NULL, " .\t\n");
-		m++;
-	}
-	*n = m;
-}
-
-void parserW(char *bloco, char **words, int *n)
-{
-	int m = 0;	
-	char *message = strtok(bloco, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
-	while(message != NULL){
-		words[m] = message;
-		message = strtok(NULL, " ,./?'\";:|^-!$#@`~*&%)(+=_}{][\n\t\\");
+		message = strtok(NULL, ".\t\n\r");
 		m++;
 	}
 	*n = m;
