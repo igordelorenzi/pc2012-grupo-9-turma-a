@@ -1,0 +1,56 @@
+Pastas:
+
+	input - contém arquivos de entrada para execução dos algoritmos
+	seq - contém os arquivos fonte da implementação sequencial
+	omp - contém os arquivos fonte da implementação com OpenMP
+	ompi - contém os arquivos fonte da implementação com OpenMPI
+
+LINK do Trabalho: http://code.google.com/p/pc2012-grupo-9-turma-a/
+
+Instruções para compilar e executar:
+
+>>>Programa 1 - Cálculo de palíndromo e soma prima
+
+>>Versão Sequencial
+  Compilar:
+    $ gcc gcc wordPrimo_seq.c -o wp_seq -lm -fopenmp
+  Executar:
+    $ ./wp_seq ../input/wikipedia.txt
+
+>>Versão Paralela com OpenMP
+  Compilar:
+    $ gcc wordPrimo_OMP.c -o wp_omp -lm -fopenmp
+  Executar:
+    $ ./wp_omp ../input/wikipedia.txt
+
+>>Versão Paralela com OpenMPI
+  Compilar:
+    $ mpicc wordPrimo_OMPI.c -o wordPrimo_OMPI -Wall
+  Executar:
+    $ mpirun -np 10 wordPrimo_OMPI ../input/wikipedia.txt
+	$ time mpirun -np 10 -machinefile machinefile.xmen wordPrimo_OMPI ../input/wikipedia.txt
+
+
+
+>>>Programa 2 - Cálculo de palíndromo de frase e palavra
+
+>>Versão Sequencial
+  Compilar:
+    $ gcc stringWord_seq.c -o sw_seq -lm -fopenmp
+  Executar:
+    $ ./wp_seq ../input/shakespe.txt
+
+>>Versão Paralela com OpenMP
+  Compilar:
+    $ gcc stringWord_OMP.c -o sw_omp -lm -fopenmp
+  Executar:
+    $ ./sw_omp ../input/shakespe.txt
+
+>>Versão Paralela com OpenMPI
+  Compilar:
+    $ mpicc stringWord_OMPI.c -o stringWord_OMPI -Wall
+  Executar:
+    $ mpirun -np 10 stringWord_OMPI ../input/shakespe.txt
+	$ time mpirun -np 10 -machinefile machinefile.xmen stringWord_OMPI ../input/shakespe.txt
+
+
