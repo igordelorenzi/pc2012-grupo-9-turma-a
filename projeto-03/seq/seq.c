@@ -105,14 +105,18 @@ void gaussJacobi(double **A, double *B, int jOrder, double jError, int jIteMax, 
 	double X1[jOrder];
 	double dif[jOrder];	
 	int i;
+	int iteracao = 0;
 	double maxi;
 	double sum = 0;
 	/* Inicia o vetor solução	*/
 	for (i = 0 ; i < jOrder ; i++)
 		X[i] = 0;
 	/* Laço que vai rodar tudo	*/
-	for(iteracao = 0 ; iteracao < jIteMax ; iteracao++)
+	while(1)
 	{
+		/* Verifica se número de iterações foi ultrapassado. */
+		if(iteracao >= jIteMax)
+			break;
 		for(i = 0 ; i < jOrder ; i++)
 			X1[i] = ((B[i] + subtratorio(X,i,jOrder,A))/A[i][i]);
 		/* Gera o vetor com a diferença das soluções.		*/
@@ -128,6 +132,7 @@ void gaussJacobi(double **A, double *B, int jOrder, double jError, int jIteMax, 
 		/* Se chegou aqui, vai precisar de mais iteração
 		  Então copia o vetor solução para começar outra */
 		copia(X,X1,jOrder);
+		iteracao++;
 	}
 	/* Saiu do laço antes do número máximo de iterações.	*/
 	if(iteracao < jIteMax)
