@@ -57,8 +57,10 @@ double subtratorio(double* X1,int lin, int jOrder, double** A)
 	double total = 0;
 	int i;
 	for(i = 0 ; i < jOrder ; i++)
+	{
 		if(i != lin) 
 			total -= X1[i]*A[lin][i];
+	}	
 	return total;
 }
 /**
@@ -70,8 +72,10 @@ double max(double* X1, int jOrder)
 	double max = X1[0];
 	int i;
 	for( i = 0 ; i < jOrder ; i++)
+	{
 		if(X1[i] > max)
 			max = X1[i];
+	}	
 	return max;
 }
 /**
@@ -82,17 +86,17 @@ void diferenca(double* X1,double* X, double* dif, int jOrder)
 {
 	int i;
 	for(i = 0 ; i < jOrder ; i++)
+	{
 		dif[i] = X1[i] - X[i];
+	}
 }
 /**
 * Função que copia o conteúdo de uma solução
 * para outra.
 */
-void copia(double* X1, double* X2, int jOrder)
+inline void copia(double* X1, double* X2, int jOrder)
 {
-	int i;
-	for(i = 0 ; i < jOrder ; i++)
-		X1[i] = X2[i];
+	memcpy(m_, m, jOrder * sizeof(double));
 }
 /**
 * O algoritmo de Gauss-Jacobi utilizando as funções
@@ -105,18 +109,14 @@ void gaussJacobi(double **A, double *B, int jOrder, double jError, int jIteMax, 
 	double X1[jOrder];
 	double dif[jOrder];	
 	int i;
-	int iteracao = 0;
 	double maxi;
 	double sum = 0;
 	/* Inicia o vetor solução	*/
 	for (i = 0 ; i < jOrder ; i++)
 		X[i] = 0;
 	/* Laço que vai rodar tudo	*/
-	while(1)
+	for(iteracao = 0 ; iteracao < jIteMax ; iteracao++)
 	{
-		/* Verifica se número de iterações foi ultrapassado. */
-		if(iteracao >= jIteMax)
-			break;
 		for(i = 0 ; i < jOrder ; i++)
 			X1[i] = ((B[i] + subtratorio(X,i,jOrder,A))/A[i][i]);
 		/* Gera o vetor com a diferença das soluções.		*/
@@ -132,7 +132,6 @@ void gaussJacobi(double **A, double *B, int jOrder, double jError, int jIteMax, 
 		/* Se chegou aqui, vai precisar de mais iteração
 		  Então copia o vetor solução para começar outra */
 		copia(X,X1,jOrder);
-		iteracao++;
 	}
 	/* Saiu do laço antes do número máximo de iterações.	*/
 	if(iteracao < jIteMax)
