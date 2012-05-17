@@ -94,9 +94,13 @@ void diferenca(double* X1,double* X, double* dif, int jOrder)
 * Função que copia o conteúdo de uma solução
 * para outra.
 */
-inline void copia(double* X1, double* X2, int jOrder)
+void copia(double* X1, double* X2, int jOrder)
 {
-	memcpy(m_, m, jOrder * sizeof(double));
+	int i;
+	for(i = 0 ; i < jOrder ; i++)
+	{
+		X1[i] = X2[i];
+	}		
 }
 /**
 * O algoritmo de Gauss-Jacobi utilizando as funções
@@ -109,8 +113,9 @@ void gaussJacobi(double **A, double *B, int jOrder, double jError, int jIteMax, 
 	double X1[jOrder];
 	double dif[jOrder];	
 	int i;
-	double maxi;
+	double maxi, error;
 	double sum = 0;
+	int iteracao;
 	/* Inicia o vetor solução	*/
 	for (i = 0 ; i < jOrder ; i++)
 		X[i] = 0;
@@ -122,15 +127,19 @@ void gaussJacobi(double **A, double *B, int jOrder, double jError, int jIteMax, 
 		/* Gera o vetor com a diferença das soluções.		*/
 		diferenca(X,X1,dif,jOrder);	
 		/* Verifica o máximo valor desse valor.		*/
-		maxi = max(dif,jOrder);
+		error = max(dif,jOrder);
+		if (error < 0)
+			error *= (-1);
 		/* Transforma para o valor absoluto */		
+		maxi = max(X1,jOrder);		
 		if (maxi < 0)
 			maxi *= (-1);
 		/* Verifica erro foi alcançado.		*/
-		if(maxi < jError)
+		error /= maxi;		
+		if(error < jError)
 			break;
 		/* Se chegou aqui, vai precisar de mais iteração
-		  Então copia o vetor solução para começar outra */
+		  Então copia o vetor solução para começar outra */	
 		copia(X,X1,jOrder);
 	}
 	/* Saiu do laço antes do número máximo de iterações.	*/
