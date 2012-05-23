@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	double *X, *X1, *dif;
 	double maxi, error;
 	double sum = 0;
-	int iteracao, totalIteracoes;
+	int iteracao, totalIteracoes, para = 0;
 
 	MPI_Init(&argc,&argv);
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 		X[i] = 0;
 
 	/* Laço que vai rodar tudo	*/
-	for (iteracao = 0 ; iteracao < jIteMax ; iteracao++)
+	for (iteracao = 0 ; para == 0 && iteracao < jIteMax ; iteracao++)
 	{
 		for (i = 0 ; i < block ; i++)
 			X1[i] = ((B_recv[i] + subtratorio(X,(jOrder + 1)*i+block*rank,
@@ -130,8 +130,8 @@ int main(int argc, char *argv[])
 		
 	}
 	
-	MPI_Reduce(&iteracao, &totalIteracoes, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-	MPI_Gather(X1,block,MPI_DOUBLE,X1,block,MPI_DOUBLE, 0,MPI_COMM_WORLD);
+	MPI_Reduce(&iteracao, &totalIteracoes, 1, MPI_INT, MPI_SUM, 0,MPI_COMM_WORLD);
+	MPI_Gather(X1,block,MPI_DOUBLE,X1,jOrder,MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
 /*if (rank==0) {*/
 /*	for(i = 0 ; i < jOrder ; i++)*/
@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
 		/* Saiu do laço antes do número máximo de iterações.	*/
 		if(totalIteracoes < jIteMax)
 		{
+			para = 1;
 			for(i = 0 ; i < jOrder ; i++)
 			{
 				sum += A[jRowTest*jOrder+i]*X1[i];
@@ -160,11 +161,12 @@ int main(int argc, char *argv[])
 		free(A);
 		free(B);
 	}
+	MPI_Bcast(&para, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-	free(X);
-	free(X1);
-	free(dif);
-	free(A_recv);
+/*	free(X);*/
+/*	free(X1);*/
+/*	free(dif);*/
+/*	free(A_recv);*/
 
 	MPI_Finalize();
 
