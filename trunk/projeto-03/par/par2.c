@@ -11,12 +11,6 @@
 #include <math.h>
 #include <mpi.h>
 
-/*typedef struct {*/
-/*	int jOrder;*/
-/*	int jRowTest;*/
-/*	int jIteMax;*/
-/*} ASD;*/
-
 double subtratorio(double*,int,int,int,double*);
 double max(double*,int);
 void diferenca(double*,double*,double*,int);
@@ -65,16 +59,13 @@ int main(int argc, char *argv[])
 		/* Alocando matriz e vetor	*/
 		B = (double *) malloc(jOrder*sizeof(double));
 		A = (double *) malloc(jOrder * jOrder * sizeof(double));
-/*		for(i = 0 ; i< jOrder ; i++){*/
-/*			A[i] = (double *) malloc(jOrder * sizeof(double));*/
-/*		}*/
+
 		/* Lendo os outros dados de entrada	*/
 		fscanf(entrada, "%d", &jRowTest);
 		fscanf(entrada, "%lf", &jError);
 		fscanf(entrada, "%d", &jIteMax);		
 		/* Preenche a matriz do sistema linear */
 		for (i = 0; i < jOrder * jOrder; i++) {
-			//for (j = 0; j < jOrder; j++)
 				fscanf(entrada, "%lf", &A[i]);
 		}
 		/* Preenche o vetor B	*/
@@ -88,14 +79,6 @@ int main(int argc, char *argv[])
 	MPI_Bcast(&jError, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&jIteMax, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-	X = (double *) malloc(jOrder*sizeof(double));
-
-	if (rank == 0) {
-		/* Inicia o vetor solução	*/
-		for (i = 0 ; i < jOrder ; i++)
-			X[i] = 0;
-	}
-
 	block = jOrder / numprocs;
 
 	A_recv = (double *) malloc(block * jOrder * sizeof(double));
@@ -103,19 +86,23 @@ int main(int argc, char *argv[])
 	
 	MPI_Scatter(A, block*jOrder, MPI_DOUBLE, A_recv, block*jOrder, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Scatter(B, block, MPI_DOUBLE, B_recv, block, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(X, jOrder, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-	printf("rank %d:\n"
-			"\tblock (%d)\n"
-			"\tA_recv (%lf)\n"
-			"\tB_recv (%lf)\n"
-			"\tjOrder (%d)\n"
-			"\tjIteMax (%d)\n"
-			"\tjError (%lf)\n\n",
-			rank,block,A_recv[0],B_recv[0],jOrder,jIteMax,jError);
+/*	printf("rank %d:\n"*/
+/*			"\tblock (%d)\n"*/
+/*			"\tA_recv (%lf)\n"*/
+/*			"\tB_recv (%lf)\n"*/
+/*			"\tjOrder (%d)\n"*/
+/*			"\tjIteMax (%d)\n"*/
+/*			"\tjError (%lf)\n\n",*/
+/*			rank,block,A_recv[0],B_recv[0],jOrder,jIteMax,jError);*/
 
-	X1 = (double *) malloc(block*sizeof(double));
+	X = (double *) malloc(jOrder*sizeof(double));
+	X1 = (double *) malloc(jOrder*sizeof(double));
 	dif = (double *) malloc(block*sizeof(double));
+
+	/* Inicia o vetor solução	*/
+	for (i = 0 ; i < jOrder ; i++)
+		X[i] = 0;
 
 	/* Laço que vai rodar tudo	*/
 	for (iteracao = 0 ; iteracao < jIteMax ; iteracao++)
@@ -124,13 +111,13 @@ int main(int argc, char *argv[])
 			X1[i] = ((B_recv[i] + subtratorio(X,(jOrder + 1)*i+block*rank,
 				i*jOrder,jOrder,A_recv))/A_recv[(jOrder + 1)*i+block*rank]);
 		/* Gera o vetor com a diferença das soluções. */
-		diferenca(X,X1,dif,jOrder);	
+		diferenca(X,X1,dif,block);
 		/* Verifica o máximo valor desse valor. */
-		error = max(dif,jOrder);
+		error = max(dif,block);
 		if (error < 0)
 			error *= (-1);
 		/* Transforma para o valor absoluto */		
-		maxi = max(X1,jOrder);		
+		maxi = max(X1,block);		
 		if (maxi < 0)
 			maxi *= (-1);
 		/* Verifica erro foi alcançado.		*/
@@ -139,18 +126,23 @@ int main(int argc, char *argv[])
 			break;
 		/* Se chegou aqui, vai precisar de mais iteração
 		  Então copia o vetor solução para começar outra */	
-		copia(X,X1,jOrder);
+		copia(X,X1,block);
 		
 	}
 	
+	MPI_Reduce(&iteracao, &totalIteracoes, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+	MPI_Gather(X1,block,MPI_DOUBLE,X1,block,MPI_DOUBLE, 0,MPI_COMM_WORLD);
 
-	//MPI_Reduce(&iteracao, &totalIteracoes, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-	MPI_Gather(X,jOrder,MPI_DOUBLE,X,jOrder,MPI_DOUBLE, 0,MPI_COMM_WORLD);
-
+/*if (rank==0) {*/
+/*	for(i = 0 ; i < jOrder ; i++)*/
+/*	{*/
+/*		printf("%lf\n",X1[i]);*/
+/*	}*/
+/*}*/
 
 	if (rank == 0) {
+
 		/* Saiu do laço antes do número máximo de iterações.	*/
-		totalIteracoes=0;
 		if(totalIteracoes < jIteMax)
 		{
 			for(i = 0 ; i < jOrder ; i++)
@@ -164,9 +156,7 @@ int main(int argc, char *argv[])
 		else
 			printf("ERROR: Number of iterations overflowed.\n");
 
-		//for(i = 0 ; i < block ; i++){
-		//	free(A[i]);
-		//}
+
 		free(A);
 		free(B);
 	}
@@ -174,9 +164,6 @@ int main(int argc, char *argv[])
 	free(X);
 	free(X1);
 	free(dif);
-	//for(i = 0 ; i < block ; i++){
-	//	free(A_recv[i]);
-	//}
 	free(A_recv);
 
 	MPI_Finalize();
