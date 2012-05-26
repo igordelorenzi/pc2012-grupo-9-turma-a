@@ -120,7 +120,7 @@ void gaussJacobi(double **A, double *B, int jOrder, double jError, int jIteMax, 
 	for (i = 0 ; i < jOrder ; i++)
 		X[i] = 0;
 	/* Laço que vai rodar tudo	*/
-	for(iteracao = 0 ; iteracao < jIteMax ; iteracao++)
+	for(iteracao = 1 ; iteracao < jIteMax ; iteracao++)
 	{
 		for(i = 0 ; i < jOrder ; i++)
 			X1[i] = ((B[i] + subtratorio(X,i,jOrder,A))/A[i][i]);
