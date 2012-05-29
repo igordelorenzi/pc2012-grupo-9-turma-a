@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 		/* Saiu do laço antes do número máximo de iterações.	*/
 		if(iteracao < jIteMax)
 		{
-			#pragma omp parallel for num_threads(nThreads) shared(A,X,jRowTest,jOrder) reduction(+:sum)
+			#pragma omp parallel for num_threads(nThreads) reduction(+:sum)
 			for(i = 0 ; i < jOrder ; i++)
 			{
 				sum += A[(jRowTest*jOrder)+i]*X[i];
@@ -166,11 +166,11 @@ double subtratorio(double *X, int i, int block, int rank, int jOrder, double *A)
 {
 	double total = 0.0;
 	int j;
-	#pragma omp parallel for num_threads(nThreads) private(i,block,jOrder,rank) reduction(-:total)
+/*	#pragma omp parallel for num_threads(nThreads) reduction(-:total)*/
 	for(j = 0 ; j < jOrder ; j++)
 	{
 		if ((i*jOrder)+j == (jOrder + 1)*i+block*rank)continue;
-		#pragma omp atomic		
+/*		#pragma omp atomic		*/
 		total -= X[j]*A[(i*jOrder)+j];
 	}	
 	return total;
