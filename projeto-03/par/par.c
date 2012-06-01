@@ -12,7 +12,7 @@
 #include <mpi.h>
 #include <omp.h>
 
-#define nThreads 2
+#define nThreads 10
 
 /* Protótipos */
 double subtratorio(double*, int, int, int, int, double*);
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	double jError, maxi, error;
 	double sum = 0.0, total = 0.0;
 	int jOrder, jRowTest, jIteMax, i, j;
-	int numprocs, rank, block;
+	int numprocs, rank, block, namelen;
 	int iteracao, totalIteracoes, para = 0;
 	char processor_name[MPI_MAX_PROCESSOR_NAME];
 	FILE *entrada;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 	/* Pega o nome do nó que está executando o processo */
 	MPI_Get_processor_name(processor_name, &namelen);
 
-	//printf("Nome do processador: %s | rank: %d\n", processor_name, rank);
+	printf("Nome do processador: %s | rank: %d\n", processor_name, rank);
 
 	/* Master coleta os dados a partir do arquivo passado por parâmetro	*/
 	if (rank == 0)
@@ -151,10 +151,12 @@ int main(int argc, char *argv[])
 			copia(buf, X, jOrder);
 		}
 
-		/* Todos os processos juntam em X as soluções parciais calculadas em X1 */
+		/* Todos os processos juntam em X as soluções 
+		 * parciais calculadas em X1 */
 		MPI_Allgather(X1, block, MPI_DOUBLE, X, block, 
 			MPI_DOUBLE, MPI_COMM_WORLD);		
 
+		/* Apenas o mestre realiza o cálculo do critério de parada */
 		if (rank == 0)
 		{
 			/* Gera o vetor com a diferença das soluções. */
@@ -170,14 +172,17 @@ int main(int argc, char *argv[])
 			if (maxi < 0.0)
 				maxi *= (-1.0);
 
-			/* Verifica erro foi alcançado.		*/
+			/* Verifica erro foi alcançado.	*/
 			error /= maxi;	
 			if (error < jError)
 				para = 1;
 		}
+
+		/*	Envia mensagem de parada para todas as tasks*/
 		MPI_Bcast(&para, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	}
 
+	/*	Mestre calcula o vetor de teste e imprime os resultados */
 	if (rank == 0) 
 	{
 		/* Saiu do laço antes do número máximo de iterações.	*/
@@ -197,10 +202,12 @@ int main(int argc, char *argv[])
 		else
 			printf("ERROR: Number of iterations overflowed.\n");
 
+		/* Libera memória */
 		free(buf);
 		free(dif);
 	}
 
+	/* Libera memória */
 	free(A);
 	free(B);
 	free(X);
