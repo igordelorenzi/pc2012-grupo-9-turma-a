@@ -1,0 +1,78 @@
+Especificação do Projeto da Disciplina
+
+Especificação do Projeto da Disciplina
+
+Desenvolva uma aplicação que consiga gerar aleatoriamente as palavras do link: http://lasdpc.icmc.usp.br:9191/~edwin/pc/palavras.txt.zip
+
+Requerimentos:
+
+    Cada caráter de cada palavra deve ser gerado  de forma totalmente aleatória.
+    Dada uma palavra que encaixe em uma frase, essa palavra deverá ser marcada como encontrada e não deveria ser aceita novamente.
+    É fundamental que haja comunicação entre os nós. Além disso, também é importante que os nós sincronizem, quando por exemplo um nó gera a primeira parte de uma palavra e o outro nó a segunda parte, constituindo uma palavra composta
+    A filtragem do arquivo é permitida
+    É permitido quebrar palavras grandes em palavras menores.
+    Gerar palavras com no máximo 5 letras. No entanto, palavras maiores que 5 letras podem ser geradas a partir das palavras geradas anteriormente (composição de palavras). Exemplo: brutelike
+    Computar o tempo que leva para gerar X % de palavras com base na solução desenvolvida pelo grupo. Exemplo:10% (X minutos), 20% (X minutos), 30% (X minutos), 40%, 50%, 60%, 70%, 80%, 90%, 100%. Mostre o percentual máximo alcançado pela solução do grupo.
+    Desconsidere palavras compostas com espacço. Exemplo: take off
+    Não precisa entregar a versão sequencial do problema
+
+Estabelecer uma estratégia para obter o maior ganho de desempenho possível sem deixar de cumprir o item 1.
+
+Obrigatório
+
+• Apresentar resultados somente em gráficos ou tabelas:
+
+• Tempo de execução da aplicação na geração das palavras
+
+• Identificar e adotar os tipos de decomposição (por quê?)
+
+• Descresver o tipo de mapeamento que foi utilizado no desenvolvimento do trabalho (por quê?)
+
+• No Google Code utilizar o link no formato: http://pc2012-grupo-x-turma-y.googlecode.com/svn/trunk/projeto-final/
+
+
+Como o grupo será avaliado?
+
+Será levado em consideração na avaliação os pontos a seguir:
+
+• A(s) técnica(s) de decomposição e mapeamento escolhidos.
+
+• A eficiência dos algoritmos utilizados para resolver o problema.
+
+• Descrição das primitivas existentes da ferramenta escolhida e como elas interagem na aplicação que foi desenvolvida.
+
+• Análise crítica da aplicação desenvolvida, citando vantagens e desvantagens das opções de projeto feitas, em relação ao desempenho, portabilidade, flexibilidade, escabilidade e granulação.
+
+• Apresentar slides contendo os pontos importantes do trabalho.
+
+• A forma de apresentação dos resultados no relatório e a escrita, bom uso das referencias (usar um padrão, por exemplo: ABNT, IEEE, etc.)
+
+• A arguição dos membros do grupo no dia da apresentação.
+
+O que deve ser entregue?
+
+• Relatório bem estruturado, com:
+
+• Capa (título do trabalho, número do grupo, nome dos integrantes do grupo e seus respectivos números USP)
+
+• Índice, número de páginas e referências bibliográficas (por exemplo o padrão ABNT, IEEE, etc).
+
+• Relatório SOMENTE via Moodle
+
+• No máximo 15 páginas
+
+• Códigos completos com documentação e README.txt indicando como executar os programas (usar Makefile (UNIX) ou build.xml (ANT) para facilitar a avaliação) Enviar SOMENTE para o repositório do Google Code
+
+Observações
+
+• Ao enviar o relatório para o Moodle teste se não houve problema ao fazer o upload.
+
+• Relatório fora do padrão será penalizado
+
+Prazos
+
+Para melhorar o desenvolvimento e a análise dos resultados obtidos, as datas de entrega do relatório e do sistema estão divididas em:
+
+Turmas A e B
+
+• Para entrega do código fonte e relatório: 24/06/12 - 23:55h
