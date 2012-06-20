@@ -8,24 +8,23 @@
 #define WORD_MAX_SIZE 5 //tamanho maximo de uma palavra
 #define PRIME 997 //numero primo usado na tabela de dispersao (hash)
 
-//nó da tabela hash
-
+/*nó da tabela hash*/
 typedef struct
 {
     char word[WORD_MAX_SIZE + 1];
     int found;
 } WORD;
 
-//estrtura da tabela hash
-
+/*estrtura da tabela hash*/
 typedef struct _NODE
 {
     char word[WORD_MAX_SIZE];
     struct _NODE *next;
 } NODE;
 
-//deixa td minusculo
+/*deixa td minusculo*/
 void tolower_word(char *);
+
 void process1(char *);
 void process2(char *);
 void process3(char *);
@@ -34,7 +33,7 @@ int main(int argc, char *argv[])
 {
     FILE *in;
     //long size;
-    char c, word[100], *subword;
+    char c, word[100], word2[100], *subword;
     int counter = 0;
 
     if (argc != 2)
@@ -68,35 +67,36 @@ int main(int argc, char *argv[])
     srand(time(NULL));
 
     /**
-     * Geram-se letra aleatórias e as comparam com todas as posições da palavra
+     * Geram-se letras aleatórias e as comparam com todas as posições da palavra
      * Caso o caracter testado combine, em qualquer posição, 
-     * substitui-se por '-'
+     * substitui-o por '-'
      * O processo termina quando todas as posições combinaram
      */
+    strcpy(word2, word);
     process1(word);
-    
+
     /**
-     * Geram-se letras aleatórias e as comparam cada posição da palavra, 
+     * Geram-se letras aleatórias e as comparam com cada posição da palavra, 
      * ou seja, a cada nova letra gerada, o teste é feito apenas na última
      * posição que não combinou
-     * Caso o caracter testado combine, substitui-se por '-'
+     * Caso o caracter testado combine, substitui-o por '-'
      * O processo termina quando todas as posições combinaram
      */
-    //process2(word);
-   
+    process2(word2);
+
     /**
      * Geram-se palavras inteiramente aleatórias e as comparam com a 
      * palavra passada por parâmetro
      * O processo termina quando a palavra aleatória combinar com a testada
      */
-/*
-    subword = strtok(word, "-, ");
-    while (subword != NULL)
-    {
-        process3(subword);//break;
-        subword = strtok(NULL, "-, ");
-    }
-*/
+    /*
+        subword = strtok(word, "-, ");
+        while (subword != NULL)
+        {
+            process3(subword); //break;
+            subword = strtok(NULL, "-, ");
+        }
+     */
 
     /*--------------- end-TESTES ---------------*/
 
@@ -120,13 +120,18 @@ int main(int argc, char *argv[])
 
 void process1(char *word)
 {
-    int wordlen, counter, i, random;
+    int wordlen, counter, i, random, letters = 0;
 
     wordlen = strlen(word), counter = 0;
-    while (counter < wordlen - 1)
+
+    for (i = 0; i < wordlen; i++)
+        if (word[i] >= 'a' && word[i] <= 'a' + 26)
+            letters++;
+    
+    while (letters != counter)
     {
         random = rand() % 26 + 'a';
-        printf("process1: rand(%d/%d) = %d (%c) | %s\n", counter, wordlen, random, (char) random, word);
+        printf("process1: rand(%d) = %d (%c) | %s\n", counter, random, (char) random, word);
 
         for (i = 0; i < wordlen; i++)
             if (word[i] == random)
@@ -135,7 +140,7 @@ void process1(char *word)
                 counter++;
             }
     }
-    printf("palavra: '%s' | %d\n\n", word, counter);
+    printf("palavra(%d caracteres): '%s' | %d\n\n", wordlen, word, counter);
 }
 
 void process2(char *word)
@@ -143,7 +148,7 @@ void process2(char *word)
     int wordlen, counter, random;
 
     wordlen = strlen(word), counter = 0;
-    while (counter < wordlen - 1)
+    while (counter < wordlen)
     {
         random = rand() % 26 + 'a';
         printf("process2: rand(%d/%d) = %d (%c) | %s\n", counter, wordlen, random, (char) random, word);
@@ -160,7 +165,7 @@ void process2(char *word)
             counter++;
         }
     }
-    printf("palavra: '%s' | %d\n\n", word, counter);
+    printf("palavra(%d caracteres): '%s' | %d\n\n", wordlen, word, counter);
 }
 
 void process3(char *word)
