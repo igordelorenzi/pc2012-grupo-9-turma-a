@@ -1,0 +1,1 @@
+Repositório para a disciplina SSC-0143 - Programação Concorrente, USP - CAASO.
